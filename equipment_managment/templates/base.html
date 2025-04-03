@@ -1,0 +1,106 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учёт оборудования</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+        }
+        body {
+            background-color: #1a1a1a;
+            color: #e5e7eb;
+        }
+         .modal-backdrop {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        }
+
+    </style>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обновление таблицы
+    htmx.on('refreshTable', function() {
+        htmx.ajax('GET', '{% url "employees:list" %}', '#employee-table');
+    });
+
+
+
+    // Закрытие модального окна
+    htmx.on('closeModal', function() {
+        const modal = document.getElementById('employee-modal');
+        modal.classList.remove('modal-open');
+        modal.setAttribute('hidden', 'true');
+    });
+
+    // Обработка ошибок формы
+    htmx.on('htmx:afterSwap', function(evt) {
+        if (evt.detail.target.id === 'form-container' && evt.detail.xhr.status === 200) {
+            const modal = document.getElementById('employee-modal');
+            modal.classList.add('modal-open');
+            modal.removeAttribute('hidden');
+        }
+    });
+    // Обработчик для toast-уведомлений
+    document.body.addEventListener('showToast', function(event) {
+    const toast = document.getElementById('toast-notification');
+    toast.textContent = event.detail.value;
+
+    // Анимация появления
+    toast.classList.remove('hidden', 'opacity-0', 'translate-y-2');
+    void toast.offsetWidth; // Триггер reflow для анимации
+    toast.classList.add('opacity-200', 'translate-y-0');
+
+    // Автоматическое затухание через 3 секунды
+    setTimeout(() => {
+        toast.classList.remove('opacity-200', 'translate-y-0');
+        toast.classList.add('opacity-200', 'translate-y-2');
+
+        // Полное скрытие после завершения анимации
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 400);
+    }, 3000);
+});
+});
+</script>
+</head>
+
+
+<body class="min-h-screen">
+    <!-- Шапка -->
+    <header class="bg-gray-800 p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-400">Учёт оборудования</h1>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="#" class="hover:text-blue-400">Сотрудники</a></li>
+                    <li><a href="#" class="hover:text-blue-400">Оборудование</a></li>
+                    <li><a href="#" class="hover:text-blue-400">Отчёты</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="container mx-auto p-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- TOAST уведомления -->
+    <div id="toast-notification"
+         class="hidden fixed bottom-4 right-4 bg-green-300 text-white px-4 py-2 rounded-md shadow-lg transition-all duration-400 opacity-0 ease-in-out ">
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Шапка -->
+<div class="mb-6 flex justify-between items-center">
+    <h2 class="text-xl font-semibold">Список сотрудников</h2>
+    <button hx-get="{% url 'employees:create' %}"
+            hx-target="#form-container"
+            class="btn btn-primary">
+        Добавить сотрудника
+    </button>
+</div>
+
+<!-- Фильтрация -->
+<div class="mb-6 bg-gray-800 p-4 rounded-lg">
+    <form hx-get="{% url 'employees:list' %}"
+          hx-target="#employee-table"
+          class="flex gap-4">
+        <select name="department" class="select select-bordered w-full max-w-xs">
+            <option value="">Все отделы</option>
+            {% for department in departments %}
+                <option value="{{ department.id }}"
+                    {% if request.GET.department == department.id|stringformat:"s" %}selected{% endif %}>
+                    {{ department.name }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-outline">Применить</button>
+    </form>
+</div>
+
+<!-- Таблица -->
+<div id="employee-table" hx-trigger="refreshTable from:body">
+    {% include "employees/partials/employee_table.html" %}
+</div>
+
+
+
+<!-- Модальное окно -->
+<div id="employee-modal" class="modal" hidden>
+
+  <!-- Фон для закрытия -->
+  <div class="modal-backdrop" onclick="htmx.trigger('body', 'closeModal')"></div>
+
+  <!-- Контент модалки -->
+  <div class="modal-box">
+    <div id="form-container"></div>
+  </div>
+
+</div>
+
+{% endblock %}
