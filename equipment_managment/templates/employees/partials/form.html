@@ -4,7 +4,7 @@
     </h3>
     <form method="post"
           hx-post="{{ request.path }}"
-          hx-target="#form-container"
+          hx-target="#modal-content"
           hx-swap="outerHTML">
         {% csrf_token %}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -25,6 +25,7 @@
             </div>
             {% endfor %}
         </div>
+
         <div class="modal-action">
             <button type="submit" class="btn btn-primary">
                 {% if is_edit %}Обновить{% else %}Создать{% endif %}

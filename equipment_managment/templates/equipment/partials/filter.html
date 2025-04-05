@@ -1,0 +1,47 @@
+<form hx-get="{% url 'equipment:equipment_filter' %}"
+      hx-target="#equipment-table"
+      hx-trigger="change, keyup delay:500ms"
+      class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Категория</span>
+        </label>
+        <select name="category" class="select select-bordered">
+            <option value="">Все категории</option>
+            {% for category in categories %}
+            <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                {{ category.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Местоположение</span>
+        </label>
+        <select name="location" class="select select-bordered">
+            <option value="">Все местоположения</option>
+            {% for location in locations %}
+            <option value="{{ location.id }}" {% if request.GET.location == location.id|stringformat:"s" %}selected{% endif %}>
+                {{ location.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Статус</span>
+        </label>
+        <select name="status" class="select select-bordered">
+            <option value="">Все статусы</option>
+            {% for status in status_choices %}
+            <option value="{{ status.0 }}" {% if request.GET.status == status.0 %}selected{% endif %}>
+                {{ status.1 }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+</form>

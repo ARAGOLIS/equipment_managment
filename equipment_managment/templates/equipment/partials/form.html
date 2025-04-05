@@ -1,0 +1,62 @@
+<div>
+    <h3 class="font-bold text-2xl mb-6">
+        {% if is_edit %}
+            <i class="fas fa-edit mr-2"></i>Редактирование оборудования
+        {% else %}
+            <i class="fas fa-plus-circle mr-2"></i>Добавление оборудования
+        {% endif %}
+    </h3>
+
+    <form method="post"
+          hx-post="{{ request.path }}"
+          hx-target="#equipment-table"
+          hx-swap="innerHTML"
+          class="space-y-4">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for field in form %}
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-medium">{{ field.label }}</span>
+                    {% if field.field.required %}
+                    <span class="label-text-alt text-error">*</span>
+                    {% endif %}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                <label class="label">
+                    <span class="label-text-alt text-gray-500">{{ field.help_text }}</span>
+                </label>
+                {% endif %}
+
+                {% if field.errors %}
+                <div class="text-error text-sm mt-1">
+                    {% for error in field.errors %}
+                    <span><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="modal-action">
+            <button type="button"
+                    onclick="closeModal()"
+                    class="btn btn-ghost">
+                <i class="fas fa-times mr-2"></i>Отмена
+            </button>
+            <button type="submit"
+                    class="btn btn-primary">
+                {% if is_edit %}
+                    <i class="fas fa-save mr-2"></i>Сохранить
+                {% else %}
+                    <i class="fas fa-check mr-2"></i>Создать
+                {% endif %}
+            </button>
+        </div>
+    </form>
+</div>

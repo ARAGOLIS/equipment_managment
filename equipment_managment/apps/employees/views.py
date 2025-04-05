@@ -1,4 +1,7 @@
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.db.models import Q, Value
+from django.db.models.functions import Concat
 from django.shortcuts import render
 
 # Create your views here.
@@ -55,12 +58,16 @@ def employee_create(request):
                         'HX-Trigger': json.dumps({
                             'closeModal': '',
                             'refreshTable': '',
-                            'showToast': f'Данные сотрудника {employee.first_name} {employee.last_name} записаны',
-
+                            'showToast': {
+                                'message': f'Сотрудник {employee.first_name} {employee.last_name} добавлен',
+                                'type': 'success'
+                            }
                         })
                     }
                 )
-            return render(request, "employees/partials/form.html", {"form": form})
+            return render(request, "employees/partials/form.html", {
+                "form": form
+            })
 
         except ValidationError as e:
             if 'email' in e.message_dict:
@@ -131,3 +138,42 @@ def employee_delete(request, pk):
         }
     )  # HTMX удалит строку автоматически
 
+
+def employee_filter(request):
+    #employees = Employee.objects.all()
+
+    # Фильтр по имени (безопасный поиск)
+    employees = Employee.objects.annotate(
+        full_name=Concat(
+            'last_name', Value(' '), 'first_name',
+            output_field=models.CharField()
+        )
+    )
+
+    # Фильтр по ФИО
+    if search_query := request.GET.get('full_name', '').strip():
+        search_terms = search_query.split()
+
+        # Базовый запрос
+        query = Q()
+
+        # Поиск по каждому термину
+        for term in search_terms:
+            if len(term) >= 2:  # Игнорируем слишком короткие термины
+                query &= (
+                        Q(full_name__icontains=term) |
+                        Q(first_name__icontains=term) |
+                        Q(last_name__icontains=term)
+                )
+
+        employees = employees.filter(query)
+
+    if department := request.GET.get('department'):
+        employees = employees.filter(department_id=department)
+
+    if position := request.GET.get('position'):
+        employees = employees.filter(position_id=position)
+
+    return render(request, "employees/partials/employee_table.html", {
+        "employees": employees
+    })
