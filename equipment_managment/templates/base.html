@@ -29,6 +29,7 @@
                 <ul class="flex space-x-6">
                     <li><a href="{% url 'employees:list' %}" class="hover:text-primary">Сотрудники</a></li>
                     <li><a href="{% url 'equipment:list' %}" class="hover:text-primary">Оборудование</a></li>
+                    <li><a href="{% url 'maintenance:plan_list' %}" class="hover:text-primary">Обслуживание</a></li>
                 </ul>
             </nav>
         </div>
@@ -52,35 +53,82 @@
     </div>
 
     <script>
+        // Универсальный скрипт для кнопок очистки фильтров
         document.addEventListener('DOMContentLoaded', function() {
+            initFilterButtons();
+
+            // Инициализация при HTMX-обновлениях
+            if (typeof htmx !== 'undefined') {
+                document.body.addEventListener('htmx:afterSwap', function() {
+                    initFilterButtons();
+                });
+            }
+        });
+
+        function initFilterButtons() {
+            // Находим все поля ввода с кнопками очистки
+            document.querySelectorAll('.form-control input[type="text"], .form-control select').forEach(input => {
+                const clearBtn = input.nextElementSibling;
+
+                // Проверяем, есть ли рядом кнопка очистки
+                if (clearBtn && clearBtn.classList.contains('absolute')) {
+                    // Функция для обновления состояния кнопки
+                    function updateClearButton() {
+                        if (input.value.trim() !== '') {
+                            clearBtn.classList.remove('opacity-0', 'cursor-default');
+                            clearBtn.classList.add('hover:text-gray-600');
+                            clearBtn.onclick = function() {
+                                input.value = '';
+                                input.focus();
+                                updateClearButton();
+                                if (typeof htmx !== 'undefined' && input.hasAttribute('hx-get')) {
+                                    htmx.trigger(input, 'keyup');
+                                }
+                            };
+                        } else {
+                            clearBtn.classList.add('opacity-0', 'cursor-default');
+                            clearBtn.classList.remove('hover:text-gray-600');
+                            clearBtn.onclick = null;
+                        }
+                    }
+
+                    // Инициализация состояния кнопки
+                    updateClearButton();
+
+                    // Обработчик изменения значения
+                    input.addEventListener('input', updateClearButton);
+                }
+            });
+        }
+
+        // Модальные окна
         htmx.on('htmx:afterSwap', function(evt) {
             if (evt.detail.target.id === 'modal-content') {
                 const modal = document.getElementById('modal');
-                 // Открываем модалку
                 modal.classList.add('modal-open');
                 modal.removeAttribute('hidden')
             }
         });
 
         htmx.on('closeModal', function() {
-        const modal = document.getElementById('modal');
-        modal.classList.remove('modal-open');
-        modal.setAttribute('hidden', 'true');
-    });
+            const modal = document.getElementById('modal');
+            modal.classList.remove('modal-open');
+            modal.setAttribute('hidden', 'true');
+        });
 
-            htmx.on('showToast', function(evt) {
-                const toast = document.getElementById('toast-notification');
-                const message = evt.detail.message;
-                const type = evt.detail.type || 'info';
+        // Уведомления
+        htmx.on('showToast', function(evt) {
+            const toast = document.getElementById('toast-notification');
+            const message = evt.detail.message;
+            const type = evt.detail.type || 'info';
 
-                toast.className = `alert alert-${type} show`;
-                document.getElementById('toast-message').textContent = message;
-                toast.hidden = false;
+            toast.className = `alert alert-${type} show`;
+            document.getElementById('toast-message').textContent = message;
+            toast.hidden = false;
 
-                setTimeout(() => {
-                    toast.className = 'alert hidden';
-                }, 3000);
-            });
+            setTimeout(() => {
+                toast.className = 'alert hidden';
+            }, 3000);
         });
 
         function openModal() {
@@ -91,9 +139,7 @@
         function closeModal() {
             document.getElementById('modal').hidden = true;
             document.body.style.overflow = 'auto';
-
         }
-
     </script>
 </body>
 </html>

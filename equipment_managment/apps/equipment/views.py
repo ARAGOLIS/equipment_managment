@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.views.decorators.http import require_http_methods
 from django.views.generic import ListView
 from django.http import HttpResponse, JsonResponse
@@ -109,7 +110,18 @@ def equipment_transfer(request, pk):
     equipment = get_object_or_404(Equipment, pk=pk)
 
     if request.method == "POST":
-        form = TransferForm(request.POST, initial={'equipment': equipment})
+
+        post_data = request.POST.copy()
+        post_data['equipment'] = str(equipment.id)
+        post_data['from_location'] = str(equipment.location.id)
+
+        form = TransferForm(post_data)
+
+        #("Данные формы:", request.POST)  # Что фактически пришло на сервер
+        if not form.is_valid():
+            print("Ошибки валидации:", form.errors.as_json())
+            # Конкретные ошибки
+
         if form.is_valid():
             transfer = form.save(commit=False)
             transfer.equipment = equipment
@@ -132,6 +144,7 @@ def equipment_transfer(request, pk):
                     })
                 }
             )
+
         return render(request, "equipment/partials/transfer_form.html", {
             "form": form,
             "equipment": equipment
@@ -152,7 +165,16 @@ def equipment_writeoff(request, pk):
     equipment = get_object_or_404(Equipment, pk=pk)
 
     if request.method == "POST":
-        form = WriteOffForm(request.POST, initial={'equipment': equipment})
+
+        post_data = request.POST.copy()
+        post_data['equipment'] = str(equipment.id)
+
+        form = WriteOffForm(post_data)
+        #print("Данные формы:", request.POST)  # Что фактически пришло на сервер
+        if not form.is_valid():
+            print("Ошибки валидации:", form.errors.as_json())
+            # Конкретные ошибки
+
         if form.is_valid():
             writeoff = form.save(commit=False)
             writeoff.equipment = equipment
@@ -191,6 +213,20 @@ def equipment_writeoff(request, pk):
 
 def equipment_filter(request):
     equipments = Equipment.objects.all()
+
+    if serial_number_query := request.GET.get('serial_number', '').strip():
+        # Разбиваем запрос на части (если нужно искать по части номера)
+        search_terms = serial_number_query.split()
+
+        # Базовый запрос
+        query = Q()
+
+        # Поиск по каждому термину
+        for term in search_terms:
+            if len(term) >= 2:  # Игнорируем слишком короткие термины
+                query &= Q(serial_number__icontains=term)
+
+        equipments = equipments.filter(query)
 
     if status := request.GET.get('status'):
         equipments = equipments.filter(status=status)

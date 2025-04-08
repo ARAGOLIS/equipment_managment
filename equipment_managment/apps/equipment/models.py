@@ -37,7 +37,7 @@ class Equipment(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    serial_number = models.CharField(max_length=100, blank=True)
+    serial_number = models.CharField(max_length=100)
     category = models.ForeignKey(EquipmentCategory, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_stock')
     purchase_date = models.DateField()

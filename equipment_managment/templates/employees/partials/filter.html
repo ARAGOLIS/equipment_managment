@@ -3,13 +3,6 @@
       hx-trigger="change, keyup delay:500ms"
       class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-
-
-<form hx-get="{% url 'employees:employee_filter' %}"
-      hx-target="#employees-table-container"
-      hx-trigger="input changed delay:1000ms"
-      class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-
     <!-- Фильтр по ФИО -->
     <div class="form-control">
         <label class="label">
@@ -17,13 +10,23 @@
         </label>
         <div class="relative">
             <input type="text"
-                   name="full_name"
-                   placeholder="ФИО"
-                   value="{{ request.GET.full_name|default:'' }}"
-                   class="input input-bordered w-full pl-10"
-                   minlength="2"
-                   maxlength="100">
-            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                   name="employee_name"
+                   id="employee_name_input"
+                   placeholder="Введите имя..."
+                   value="{{ request.GET.employee_name|default:'' }}"
+                   class="input input-bordered w-full pr-10"
+                   hx-get="{% url 'employees:employee_filter' %}"
+                   hx-target="#employee-table"
+                   hx-trigger="keyup changed delay:500ms"
+                   data-filter-input
+                   data-clear-btn="clear_equipment_btn">
+
+            <button type="button"
+                    id="clear_serial_btn"
+                    class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors
+                           {% if not request.GET.equipment %}opacity-0 cursor-default{% endif %}">
+                <i class="fas fa-times-circle"></i>
+            </button>
         </div>
     </div>
 
@@ -40,8 +43,5 @@
             {% endfor %}
         </select>
     </div>
-
-
-
 
 </form>

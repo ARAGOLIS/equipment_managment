@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, Value
@@ -13,6 +14,7 @@ from .models import Employee, Department
 from .forms import EmployeeForm
 import json
 
+
 class EmployeeListView(ListView):
     model = Employee
     template_name = "employees/list.html"
@@ -24,6 +26,7 @@ class EmployeeListView(ListView):
         if department:
             queryset = queryset.filter(department__id=department)
         return queryset
+
 
 
 def employee_list(request):
@@ -95,8 +98,10 @@ def employee_update(request, pk):
                         'HX-Trigger': json.dumps({
                             'closeModal': '',
                             'refreshTable': '',
-                            'showToast': f'Данные сотрудника {employee.first_name} {employee.last_name} обновлены',
-
+                            'showToast': {
+                                'message': f'Данные сотрудника {employee.first_name} {employee.last_name} обновлены',
+                                'type': 'success'
+                            }
                         })
                     }
                 )
@@ -132,15 +137,17 @@ def employee_delete(request, pk):
         headers={
             'HX-Trigger': json.dumps({
                 'refreshTable': '',
-                'showToast': f'Сотрудник {employee.first_name} {employee.last_name} успешно удален',
-
+                'showToast': {
+                    'message': f'Сотрудник {employee.first_name} {employee.last_name} успешно удален',
+                    'type': 'error'
+                }
             })
         }
-    )  # HTMX удалит строку автоматически
+    )
 
 
 def employee_filter(request):
-    #employees = Employee.objects.all()
+    # employees = Employee.objects.all()
 
     # Фильтр по имени (безопасный поиск)
     employees = Employee.objects.annotate(
@@ -149,9 +156,8 @@ def employee_filter(request):
             output_field=models.CharField()
         )
     )
-
     # Фильтр по ФИО
-    if search_query := request.GET.get('full_name', '').strip():
+    if search_query := request.GET.get('employee_name', '').strip():
         search_terms = search_query.split()
 
         # Базовый запрос
