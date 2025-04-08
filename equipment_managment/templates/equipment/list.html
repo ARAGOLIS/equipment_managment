@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <h2 class="text-2xl font-semibold">Список оборудования</h2>
+    <button hx-get="{% url 'equipment:create' %}"
+            hx-target="#modal-content"
+            class="btn btn-primary">
+        <i class="fas fa-plus mr-2"></i> Добавить оборудование
+    </button>
+</div>
+
+<div class="card bg-base-200 p-4 mb-6">
+    {% include "equipment/partials/filter.html" %}
+</div>
+
+<div id="equipment-table" hx-trigger="refreshTable from:body" hx-get="{% url 'equipment:equipment_filter' %}" hx-target="this">
+    {% include "equipment/partials/table.html" %}
+</div>
+{% endblock %}

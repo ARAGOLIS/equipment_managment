@@ -1,0 +1,93 @@
+<table class="table w-full">
+    <thead>
+        <tr>
+            <th>Наименование</th>
+            <th>Серийный номер</th>
+            <th>Категория</th>
+            <th>Местоположение</th>
+            <th>Статус</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for equipment in equipments %}
+        <tr class="hover">
+            <td>{{ equipment.name }}</td>
+            <td>{{ equipment.serial_number }}</td>
+            <td>{{ equipment.category.name }}</td>
+            <td>{{ equipment.location.name }}</td>
+            <td>
+                <span class="badge badge-{{ equipment.get_status_badge }}">
+                    {{ equipment.get_status_display }}
+                </span>
+            </td>
+            <td class="flex space-x-2">
+                <button hx-get="{% url 'equipment:update' equipment.pk %}"
+                        hx-target="#modal-content"
+                        class="btn btn-sm btn-outline"
+                        title="Редактировать">
+                    <i class="fas fa-edit"></i>
+                </button>
+
+                <button hx-get="{% url 'equipment:transfer' equipment.pk %}"
+                        hx-target="#modal-content"
+                        class="btn btn-sm btn-outline btn-info"
+                        title="Передать">
+                    <i class="fas fa-exchange-alt"></i>
+                </button>
+
+                <button hx-get="{% url 'equipment:writeoff' equipment.pk %}"
+                        hx-target="#modal-content"
+                        class="btn btn-sm btn-outline btn-warning"
+                        title="Списать">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+
+                <button onclick="confirmDelete('{{ equipment.pk }}', '{{ equipment.name }}')"
+                        class="btn btn-sm btn-outline btn-error"
+                        title="Удалить">
+                    <i class="fas fa-times"></i>
+                </button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center py-4">Оборудование не найдено</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if equipments.has_other_pages %}
+<div class="join mt-4">
+    {% if equipments.has_previous %}
+    <button hx-get="{% url 'equipment:filter' %}?page={{ equipments.previous_page_number }}"
+            hx-target="#equipment-table"
+            class="join-item btn">«</button>
+    {% endif %}
+
+    {% for i in equipments.paginator.page_range %}
+    {% if equipments.number == i %}
+    <button class="join-item btn btn-active">{{ i }}</button>
+    {% else %}
+    <button hx-get="{% url 'equipment:filter' %}?page={{ i }}"
+            hx-target="#equipment-table"
+            class="join-item btn">{{ i }}</button>
+    {% endif %}
+    {% endfor %}
+
+    {% if equipments.has_next %}
+    <button hx-get="{% url 'equipment:filter' %}?page={{ equipments.next_page_number }}"
+            hx-target="#equipment-table"
+            class="join-item btn">»</button>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+    function confirmDelete(pk, name) {
+        if (confirm(`Вы уверены, что хотите удалить "${name}"?`)) {
+            htmx.ajax('DELETE', `/equipment/${pk}/delete/`, '#equipment-table');
+        }
+    }
+</script>

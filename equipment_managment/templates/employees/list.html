@@ -3,50 +3,26 @@
 {% block content %}
 <!-- Шапка -->
 <div class="mb-6 flex justify-between items-center">
-    <h2 class="text-xl font-semibold">Список сотрудников</h2>
+    <h2 class="text-2xl font-semibold">Список сотрудников</h2>
     <button hx-get="{% url 'employees:create' %}"
-            hx-target="#form-container"
+            hx-target="#modal-content"
             class="btn btn-primary">
-        Добавить сотрудника
+        <i class="fas fa-plus mr-2"></i> Добавить сотрудника
     </button>
 </div>
 
 <!-- Фильтрация -->
-<div class="mb-6 bg-gray-800 p-4 rounded-lg">
-    <form hx-get="{% url 'employees:list' %}"
-          hx-target="#employee-table"
-          class="flex gap-4">
-        <select name="department" class="select select-bordered w-full max-w-xs">
-            <option value="">Все отделы</option>
-            {% for department in departments %}
-                <option value="{{ department.id }}"
-                    {% if request.GET.department == department.id|stringformat:"s" %}selected{% endif %}>
-                    {{ department.name }}
-                </option>
-            {% endfor %}
-        </select>
-        <button type="submit" class="btn btn-outline">Применить</button>
-    </form>
+<div class="card bg-base-200 p-4 mb-6">
+    {% include "employees/partials/filter.html" %}
 </div>
 
 <!-- Таблица -->
-<div id="employee-table" hx-trigger="refreshTable from:body">
+<div id="employee-table" hx-trigger="refreshTable from:body" hx-get="{% url 'employees:employee_filter' %}" hx-target="this">
     {% include "employees/partials/employee_table.html" %}
 </div>
 
 
 
-<!-- Модальное окно -->
-<div id="employee-modal" class="modal" hidden>
 
-  <!-- Фон для закрытия -->
-  <div class="modal-backdrop" onclick="htmx.trigger('body', 'closeModal')"></div>
-
-  <!-- Контент модалки -->
-  <div class="modal-box">
-    <div id="form-container"></div>
-  </div>
-
-</div>
 
 {% endblock %}

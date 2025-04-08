@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <h2 class="text-xl font-semibold">Планы ТО</h2>
+    <button hx-get="{% url 'maintenance:plan_create' %}"
+            hx-target="#modal-content"
+            class="btn btn-primary">
+            <i class="fas fa-plus mr-2"></i>Добавить план
+    </button>
+</div>
+<div class="card bg-base-200 p-4 mb-6">
+    {% include "maintenance/partials/filter.html" %}
+</div>
+
+<div id="maintenance-table" hx-trigger="refreshTable from:body" hx-get="{% url 'maintenance:plan_filter' %}" hx-target="this">
+    {% include "maintenance/partials/table.html" %}
+</div>
+{% endblock %}

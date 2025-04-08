@@ -37,7 +37,7 @@ class Equipment(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    serial_number = models.CharField(max_length=100, blank=True, null=True)
+    serial_number = models.CharField(max_length=100)
     category = models.ForeignKey(EquipmentCategory, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_stock')
     purchase_date = models.DateField()
@@ -51,6 +51,15 @@ class Equipment(models.Model):
     def __str__(self):
         return f"{self.name} ({self.serial_number})"
 
+    @property
+    def get_status_badge(self):
+        status_map = {
+            'in_stock': 'success',
+            'in_use': 'primary',
+            'repair': 'warning',
+            'written_off': 'error'
+        }
+        return status_map.get(self.status, 'neutral')
 
 class EquipmentTransfer(models.Model):
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)

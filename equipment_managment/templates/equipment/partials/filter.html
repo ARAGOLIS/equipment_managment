@@ -1,0 +1,78 @@
+<form hx-get="{% url 'equipment:equipment_filter' %}"
+      hx-target="#equipment-table"
+      hx-trigger="change, keyup delay:500ms"
+      class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+            <!-- Фильтр по серийнику -->
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Серийный номер</span>
+        </label>
+        <div class="relative">
+            <input type="text"
+                   name="serial_number"
+                   id="serial_number_input"
+                   placeholder="Введите серийный номер..."
+                   value="{{ request.GET.serial_number|default:'' }}"
+                   class="input input-bordered w-full pr-10"
+                   hx-get="{% url 'equipment:equipment_filter' %}"
+                   hx-target="#equipment-table"
+                   hx-trigger="keyup changed delay:500ms"
+                   data-filter-input
+                   data-clear-btn="clear_serial_btn">
+
+            <!-- Кнопка очистки  -->
+            <button type="button"
+                    id="clear_serial_btn"
+                class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors
+                       {% if not request.GET.equipment %}opacity-0 cursor-default{% endif %}">
+                <i class="fas fa-times-circle"></i>
+            </button>
+        </div>
+    </div>
+
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Категория</span>
+        </label>
+        <select name="category" class="select select-bordered">
+            <option value="">Все категории</option>
+            {% for category in categories %}
+            <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                {{ category.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Местоположение</span>
+        </label>
+        <select name="location" class="select select-bordered">
+            <option value="">Все местоположения</option>
+            {% for location in locations %}
+            <option value="{{ location.id }}" {% if request.GET.location == location.id|stringformat:"s" %}selected{% endif %}>
+                {{ location.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Статус</span>
+        </label>
+        <select name="status" class="select select-bordered">
+            <option value="">Все статусы</option>
+            {% for status in status_choices %}
+            <option value="{{ status.0 }}" {% if request.GET.status == status.0 %}selected{% endif %}>
+                {{ status.1 }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+
+</form>

@@ -1,0 +1,47 @@
+<form hx-get="{% url 'employees:employee_filter' %}"
+      hx-target="#employee-table"
+      hx-trigger="change, keyup delay:500ms"
+      class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <!-- Фильтр по ФИО -->
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">ФИО сотрудника</span>
+        </label>
+        <div class="relative">
+            <input type="text"
+                   name="employee_name"
+                   id="employee_name_input"
+                   placeholder="Введите имя..."
+                   value="{{ request.GET.employee_name|default:'' }}"
+                   class="input input-bordered w-full pr-10"
+                   hx-get="{% url 'employees:employee_filter' %}"
+                   hx-target="#employee-table"
+                   hx-trigger="keyup changed delay:500ms"
+                   data-filter-input
+                   data-clear-btn="clear_equipment_btn">
+
+            <button type="button"
+                    id="clear_serial_btn"
+                    class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors
+                           {% if not request.GET.equipment %}opacity-0 cursor-default{% endif %}">
+                <i class="fas fa-times-circle"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Отдел</span>
+        </label>
+        <select name="department" class="select select-bordered">
+            <option value="">Все отделы</option>
+            {% for department in departments %}
+            <option value="{{ department.id }}" {% if request.GET.department == department.id|stringformat:"s" %}selected{% endif %}>
+                {{ department.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+</form>

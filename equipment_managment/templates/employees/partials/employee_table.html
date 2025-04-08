@@ -1,4 +1,4 @@
-<table class="table table-zebra w-full">
+<table class="table w-full">
     <thead>
         <tr>
             <th>ФИО</th>
@@ -10,28 +10,70 @@
     </thead>
     <tbody>
         {% for employee in employees %}
-        <tr>
+        <tr class="hover">
             <td>{{ employee.first_name }} {{ employee.last_name }}</td>
             <td>{{ employee.department.name|default:"-" }}</td>
             <td>{{ employee.email }}</td>
             <td>{{ employee.phone|default:"-" }}</td>
 
-            <td class="flex gap-2">
+            <td class="flex space-x-2">
                 <button hx-get="{% url 'employees:update' employee.id %}"
-                        hx-target="#form-container"
-                        class="btn btn-sm btn-outline">
-                        Редактировать
+                        hx-target="#modal-content"
+                        class="btn btn-sm btn-outline"
+                        title="Редактировать">
+                    <i class="fas fa-edit"></i>
                 </button>
+
+
                 <button hx-delete="{% url 'employees:delete' employee.id %}"
-                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    hx-confirm="Удалить сотрудника {{ employee.first_name }} {{ employee.last_name }}?"
-                    hx-target="closest tr"
-                    hx-swap="outerHTML"
-                    class="btn btn-sm btn-error">
-                Удалить
-            </button>
+                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                        hx-confirm="Удалить сотрудника {{ employee.first_name }} {{ employee.last_name }}?"
+                        hx-target="closest tr"
+                        hx-swap="outerHTML"
+                        class="btn btn-sm btn-outline btn-error"
+                        title="Удалить">
+                    <i class="fas fa-times"></i>
+                </button>
             </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center py-4">Сотрудники не найдены</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+{% if employees.has_other_pages %}
+<div class="join mt-4">
+    {% if employees.has_previous %}
+    <button hx-get="{% url 'employees:list' %}?page={{ employees.previous_page_number }}"
+            hx-target="#employees-table"
+            class="join-item btn">«</button>
+    {% endif %}
+
+    {% for i in employees.paginator.page_range %}
+    {% if employees.number == i %}
+    <button class="join-item btn btn-active">{{ i }}</button>
+    {% else %}
+    <button hx-get="{% url 'employees:list' %}?page={{ i }}"
+            hx-target="#employees-table"
+            class="join-item btn">{{ i }}</button>
+    {% endif %}
+    {% endfor %}
+
+    {% if employees.has_next %}
+    <button hx-get="{% url 'employees:list' %}?page={{ employees.next_page_number }}"
+            hx-target="#employees-table"
+            class="join-item btn">»</button>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+    function confirmDelete(pk, name) {
+        if (confirm(`Вы уверены, что хотите удалить "${name}"?`)) {
+            htmx.ajax('DELETE', `/employees/${pk}/delete/`, '#employees-table');
+        }
+    }
+</script>
