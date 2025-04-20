@@ -2,268 +2,35 @@
 
 {% block content %}
 <div class="grid grid-cols-1 gap-6">
-    <!-- Первый ряд: Таблица обслуживаний и графики -->
+    <!-- Первый ряд -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[400px]">
-        <!-- Левая колонка: Таблица -->
         <div class="lg:col-span-1">
-            <div class="card bg-base-200 shadow h-full">
-                <div class="card-body">
-                    <h2 class="card-title">
-                        <i class="fas fa-calendar-day mr-2"></i>
-                        Ближайшие обслуживания (7 дней)
-                    </h2>
-                    <div class="grid grid-cols-3">
-                        <table class="table w-full">
-                            <thead>
-                                <tr>
-                                    <th>Оборудование</th>
-                                    <th>Тип ТО</th>
-                                    <th>Дата</th>
-                                    <th>Ответственный</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for plan in upcoming_maintenances %}
-                                <tr class="hover">
-                                    <td>
-                                        <div class="font-bold">{{ plan.equipment.name }}</div>
-                                        <div class="text-sm opacity-50">{{ plan.equipment.serial_number }}</div>
-                                    </td>
-                                    <td>{{ plan.maintenance_type.name }}</td>
-                                    <td>{{ plan.planned_date|date:"d.m.Y" }}</td>
-                                    <td>{{ plan.assigned_to.first_name }} {{ plan.assigned_to.last_name }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-4">Нет предстоящих ТО</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="card-actions justify-end mt-4">
-                        <a href="{% url 'maintenance:plan_list' %}" class="btn btn-primary btn-sm">
-                            Все планы ТО <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            {% include "dashboard/partials/upcoming_maintenances.html" %}
         </div>
-
-        <!-- Правая колонка: Графики -->
         <div class="lg:col-span-2">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-                <!-- Таблица недавних списаний -->
-                <div class="card bg-base-200 shadow">
-                    <div class="card-body">
-                        <h2 class="card-title">
-                            <i class="fas fa-chart-pie mr-2"></i>
-                            Списания оборудования
-                        </h2>
-                         <div class="overflow-x-auto">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Оборудование</th>
-                                    <th>Дата</th>
-                                    <th>Причина</th>
-                                    <th>Одобрил</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for writeoff in recent_writeoffs %}
-                                <tr class="hover">
-                                    <td>
-                                        <div class="font-bold">{{ writeoff.equipment.name }}</div>
-                                        <div class="text-sm opacity-50">{{ writeoff.equipment.serial_number }}</div>
-                                    </td>
-                                    <td>{{ writeoff.write_off_date|date:"d.m.Y" }}</td>
-                                    <td>{{ writeoff.reason }}</td>
-                                    <td>{{ writeoff.approved_by}}</td>
-
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-4">Нет недавних списаний</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                             <div class="card-actions justify-end mt-4">
-                                <a href="{% url 'equipment:write_off_list' %}" class="btn btn-primary btn-sm">
-                                    Все cписания (in work) <i class="fas fa-arrow-right ml-2"></i>
-                                </a>
-                             </div>
-                    </div>
-                    </div>
-                </div>
-
-                <!-- Линейный график: Обслуживания по дням -->
-                <div class="card bg-base-200 shadow">
-                    <div class="card-body">
-                        <h2 class="card-title">
-                            <i class="fas fa-chart-line mr-2"></i>
-                            Обслуживания по дням
-                        </h2>
-                        <div class="h-64 overflow-hidden">
-                            <canvas id="maintenance-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
+                {% include "dashboard/partials/writeoffs_table.html" %}
+                {% include "dashboard/partials/maintenance_chart.html" %}
             </div>
         </div>
     </div>
 
-
-
-
-
-
-
-    <!-- Второй ряд: Столбчатая диаграмма и таблица перемещений -->
+    <!-- Второй ряд -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[400px]">
-        <!-- Левая часть: Столбчатая диаграмма -->
         <div class="lg:col-span-2">
-            <div class="card bg-base-200 shadow h-full">
-                <div class="card-body">
-                    <h2 class="card-title">
-                        <i class="fas fa-chart-bar mr-2"></i>
-                        Оборудование по категориям
-                    </h2>
-                    <div class="h-64 overflow-hidden" align="center">
-                        <canvas id="category-chart"></canvas>
-                    </div>
-                </div>
-            </div>
+            {% include "dashboard/partials/category_chart.html" %}
         </div>
-
-        <!-- Правая часть: Таблица перемещений -->
         <div class="lg:col-span-1">
-            <div class="card bg-base-200 shadow h-full">
-                <div class="card-body">
-                    <h2 class="card-title">
-                        <i class="fas fa-truck mr-2"></i>
-                        Последние перемещения
-                    </h2>
-                    <div class="overflow-x-auto">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Оборудование</th>
-                                    <th>Откуда</th>
-                                    <th>Куда</th>
-                                    <th>Дата</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for transfer in recent_transfers %}
-                                <tr class="hover">
-                                    <td>
-                                        <div class="font-bold">{{ transfer.equipment.name }}</div>
-                                        <div class="text-sm opacity-50">{{ transfer.equipment.serial_number }}</div>
-                                    </td>
-                                    <td>{{ transfer.from_location.name }}</td>
-                                    <td>{{ transfer.to_location.name }}</td>
-                                    <td>{{ transfer.transfer_date|date:"d.m.Y H:i" }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-4">Нет недавних перемещений</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="card-actions justify-end mt-4">
-                        <a href="{% url 'equipment:transfer_list' %}" class="btn btn-primary btn-sm">
-                            Все перемещения <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            {% include "dashboard/partials/transfers_table.html" %}
         </div>
     </div>
 </div>
 
-<!-- Подключаем Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Проверка наличия canvas элементов
-    const maintenanceCanvas = document.getElementById('maintenance-chart');
-    const categoryCanvas = document.getElementById('category-chart');
-
-    if (!maintenanceCanvas || !categoryCanvas) {
-        console.error('Один или несколько canvas элементов не найдены');
-        return;
-    }
-
-    // Линейный график: Обслуживания по дням
-    const maintenanceCtx = maintenanceCanvas.getContext('2d');
-    new Chart(maintenanceCtx, {
-        type: 'line',
-        data: {
-            labels: {{ maintenance_labels|safe }},
-            datasets: [{
-                label: 'Количество обслуживаний',
-                data: {{ maintenance_data|safe }},
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            aspectRatio: 1.5, // Соотношение ширины к высоте
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Количество' }
-                },
-                x: {
-                    title: { display: true, text: 'Дата' }
-                }
-            }
-        }
-    });
-
-    // Столбчатая диаграмма: Оборудование по категориям
-    const categoryCtx = categoryCanvas.getContext('2d');
-    new Chart(categoryCtx, {
-        type: 'bar',
-        data: {
-            labels: {{ category_labels|safe }},
-            datasets: [{
-                label: 'Количество оборудования',
-                data: {{ category_data|safe }},
-                backgroundColor: '#10b981',
-                borderColor: '#10b981',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            aspectRatio: 2, // Соотношение ширины к высоте (шире, так как занимает 2/3)
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Количество' }
-                },
-                x: {
-                    title: { display: true, text: 'Категория' }
-                }
-            }
-        }
-    });
+    // Инициализация графиков
 });
 </script>
 {% endblock %}
