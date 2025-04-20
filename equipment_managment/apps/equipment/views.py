@@ -114,6 +114,7 @@ def equipment_transfer(request, pk):
         post_data = request.POST.copy()
         post_data['equipment'] = str(equipment.id)
         post_data['from_location'] = str(equipment.location.id)
+        post_data['from_employee'] = str(equipment.current_owner.id)
 
         form = TransferForm(post_data)
 
@@ -159,6 +160,12 @@ def equipment_transfer(request, pk):
         "form": form,
         "equipment": equipment
     })
+
+def equipment_transfer_list(request):
+    transfers = EquipmentTransfer.objects.all().select_related(
+        'equipment', 'from_location', 'to_location', 'from_employee', 'to_employee'
+    ).order_by('-transfer_date')
+    return render(request, 'equipment/partials/transfer_list.html', {'transfers': transfers})
 
 
 def equipment_writeoff(request, pk):
@@ -210,6 +217,9 @@ def equipment_writeoff(request, pk):
         "equipment": equipment
     })
 
+def equipment_write_off_list(request):
+    write_off = EquipmentWriteOff.objects.all().order_by('-write_off_date')
+    return render(request, 'equipment/partials/write_off_list.html', {'write_off': write_off})
 
 def equipment_filter(request):
     equipments = Equipment.objects.all()

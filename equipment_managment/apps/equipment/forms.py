@@ -48,7 +48,7 @@ class EquipmentForm(forms.ModelForm):
 class TransferForm(forms.ModelForm):
     class Meta:
         model = EquipmentTransfer
-        fields = ['equipment', 'from_location', 'to_location', 'to_employee', 'reason']
+        fields = ['equipment', 'from_location', 'to_location', 'from_employee', 'to_employee', 'reason']
         widgets = {
             'reason': forms.Textarea(
                 attrs={
