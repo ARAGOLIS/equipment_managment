@@ -28,6 +28,16 @@ class MaintenancePlan(models.Model):
     assigned_to = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True)  # Кто отвечает
     status = models.CharField(choices=STATUS_CHOICES)
 
+    @property
+    def get_status_badge(self):
+        status_map = {
+            'completed': 'success',
+            'in_progress': 'primary',
+            'planned': 'warning',
+            'cancelled': 'error'
+        }
+        return status_map.get(self.status, 'neutral')
+
 
 class MaintenanceLog(models.Model):
     plan = models.OneToOneField(MaintenancePlan, on_delete=models.CASCADE, related_name='log')

@@ -118,7 +118,7 @@ def equipment_transfer(request, pk):
 
         form = TransferForm(post_data)
 
-        #("Данные формы:", request.POST)  # Что фактически пришло на сервер
+        # ("Данные формы:", request.POST)  # Что фактически пришло на сервер
         if not form.is_valid():
             print("Ошибки валидации:", form.errors.as_json())
             # Конкретные ошибки
@@ -161,6 +161,7 @@ def equipment_transfer(request, pk):
         "equipment": equipment
     })
 
+
 def equipment_transfer_list(request):
     transfers = EquipmentTransfer.objects.all().select_related(
         'equipment', 'from_location', 'to_location', 'from_employee', 'to_employee'
@@ -177,7 +178,7 @@ def equipment_writeoff(request, pk):
         post_data['equipment'] = str(equipment.id)
 
         form = WriteOffForm(post_data)
-        #print("Данные формы:", request.POST)  # Что фактически пришло на сервер
+        # print("Данные формы:", request.POST)  # Что фактически пришло на сервер
         if not form.is_valid():
             print("Ошибки валидации:", form.errors.as_json())
             # Конкретные ошибки
@@ -217,9 +218,11 @@ def equipment_writeoff(request, pk):
         "equipment": equipment
     })
 
+
 def equipment_write_off_list(request):
     write_off = EquipmentWriteOff.objects.all().order_by('-write_off_date')
     return render(request, 'equipment/partials/write_off_list.html', {'write_off': write_off})
+
 
 def equipment_filter(request):
     equipments = Equipment.objects.all()

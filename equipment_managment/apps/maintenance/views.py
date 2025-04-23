@@ -6,7 +6,7 @@ from django.db import transaction
 import json
 from django.utils import timezone
 from .models import MaintenancePlan, MaintenanceType, MaintenanceLog, Part
-from .forms import MaintenancePlanForm
+from .forms import MaintenancePlanForm, MaintenanceLogForm, PartUsageFormSet
 
 
 class MaintenancePlanListView(ListView):
@@ -119,6 +119,78 @@ def maintenance_plan_delete(request, pk):
             }
         )
     return HttpResponse(status=405)
+
+
+def start_maintenance(request, pk):
+    plan = get_object_or_404(MaintenancePlan, pk=pk)
+    if plan.status != 'planned':
+        return HttpResponse(status=400)
+
+    plan.status = 'in_progress'
+    plan.save()
+
+    return HttpResponse(
+        status=204,
+        headers={'HX-Trigger': json.dumps({
+            'refreshTable': '',
+            'showToast': {
+                'message': f'ТО для {plan.equipment.name} начато',
+                'type': 'success'
+            }
+        })}
+    )
+
+
+@transaction.atomic
+def maintenance_log_create(request, pk):
+    plan = get_object_or_404(MaintenancePlan, pk=pk)
+
+    if request.method == "POST":
+        form = MaintenanceLogForm(request.POST, plan=plan)
+        formset = PartUsageFormSet(request.POST, form_kwargs={'plan': plan})
+
+        if form.is_valid() and formset.is_valid():
+            log = form.save(commit=False)
+            log.plan = plan
+            log.save()
+            form.save_m2m()  # Save parts
+            formset.instance = log
+            formset.save()
+
+            # Update plan status to completed
+            plan.status = 'completed'
+            plan.save()
+
+            return HttpResponse(
+                status=204,
+                headers={
+                    'HX-Trigger': json.dumps({
+                        'closeModal': '',
+                        'refreshTable': '',
+                        'showToast': {
+                            'message': f'Лог ТО для {log.plan.equipment.name} создан',
+                            'type': 'success'
+                        }
+                    })
+                }
+            )
+        return render(request, "maintenance/partials/log_form.html", {
+            "form": form,
+            "formset": formset,
+            "plan": plan
+        })
+
+    form = MaintenanceLogForm(initial={
+        'actual_date': timezone.now()
+    }, plan=plan)
+    formset = PartUsageFormSet(form_kwargs={'plan': plan})
+    return render(request, "maintenance/partials/log_form.html", {
+        "form": form,
+        "formset": formset,
+        "plan": plan
+    })
+
+
 
 
 def maintenance_plan_filter(request):

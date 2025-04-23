@@ -1,10 +1,156 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<div id="modal-content">
+    <h3 class="font-bold text-xl mb-6">
+        Создание лога ТО
+    </h3>
 
-</body>
-</html>
+    <form hx-post="{{ request.path }}"
+          hx-target="#modal-content"
+          hx-swap="outerHTML">
+        {% csrf_token %}
+
+        <!-- Group 1: General Information -->
+        <div class="mb-6">
+            <h4 class="font-bold text-lg mb-4">Общая информация</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for field in form %}
+                {% if field.name in 'actual_date,completed_by' %}
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">
+                            {{ field.label }}
+                            {% if field.name == 'actual_date' %}
+                            <span class="text-error">*</span>
+                            {% endif %}
+                        </span>
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="text-error text-sm mt-1">
+                        {% for error in field.errors %}
+                        <span><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Group 2: Work Details -->
+        <div class="mb-6">
+            <h4 class="font-bold text-lg mb-4">Детали выполнения</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for field in form %}
+                {% if field.name in 'result,hours_spent,is_critical' %}
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">
+                            {{ field.label }}
+                            {% if field.name in 'result,hours_spent,is_critical' %}
+                            <span class="text-error">*</span>
+                            {% endif %}
+                        </span>
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="text-error text-sm mt-1">
+                        {% for error in field.errors %}
+                        <span><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Group 3: Additional Observations -->
+        <div class="mb-6">
+            <h4 class="font-bold text-lg mb-4">Дополнительные наблюдения</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for field in form %}
+                {% if field.name in 'problems_found,recommendations,next_service_date' %}
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">{{ field.label }}</span>
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="text-error text-sm mt-1">
+                        {% for error in field.errors %}
+                        <span><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Group 4: Parts Usage -->
+        <div class="mb-6">
+            <h4 class="font-bold text-lg mb-4">Использованные запчасти</h4>
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text font-medium">{{ form.parts.label }}</span>
+                </label>
+                {{ form.parts }}
+                {% if form.parts.errors %}
+                <div class="text-error text-sm mt-1">
+                    {% for error in form.parts.errors %}
+                    <span><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {{ formset.management_form }}
+            <div id="formset-container" class="space-y-4">
+                {% for formset_form in formset %}
+                <div class="formset-row grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4">
+                    {% for field in formset_form %}
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">
+                                {{ field.label }}
+                                {% if field.name == 'quantity' %}
+                                <span class="text-error">*</span>
+                                {% endif %}
+                            </span>
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <div class="text-error text-sm mt-1">
+                            {% for error in field.errors %}
+                            <span><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% if formset.can_delete %}
+                    <div class="form-control flex items-end">
+                        {{ formset_form.DELETE }}
+                        <label class="label cursor-pointer">
+                            <span class="label-text font-medium">Удалить</span>
+                        </label>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="modal-action">
+            <button type="button" onclick="closeModal()"
+                    class="btn btn-ghost">
+                Отмена
+            </button>
+            <button type="submit" class="btn btn-primary">
+                Создать
+            </button>
+        </div>
+    </form>
+</div>

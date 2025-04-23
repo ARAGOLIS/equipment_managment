@@ -17,9 +17,7 @@
                     <span class="font-medium">{{ plan.equipment.name }}</span>
                     <span class="text-xs bg-neutral-100/40 dark:bg-neutral-800/40
                                 rounded-lg px-2 py-1 border border-neutral-200 dark:border-neutral-700
-                                text-neutral-500/70 dark:text-neutral-400/60 mt-1.5 w-fit
-                                transition-all duration-200 hover:bg-neutral-200/40 dark:hover:bg-neutral-700/60
-                                backdrop-blur-sm">
+                                text-neutral-500/70 dark:text-neutral-400/60 mt-1.5 w-fit">
                         {{ plan.equipment.serial_number }}
                     </span>
                 </div>
@@ -28,17 +26,36 @@
             <td>{{ plan.planned_date|date:"d.m.Y" }}</td>
             <td>{{ plan.assigned_to }}</td>
             <td>
-                <span class="badge badge-{{ plan.status }}">
+                <span class="badge badge-{{ plan.get_status_badge }}">
                     {{ plan.get_status_display }}
                 </span>
             </td>
             <td class="flex space-x-2">
+                {% if plan.status == 'planned' %}
+                <button hx-post="{% url 'maintenance:plan_start' plan.pk %}"
+                        hx-confirm="Начать ТО для {{ plan.equipment.name }}?"
+                        class="btn btn-sm btn-success"
+                        title="Начать ТО">
+                    <i class="fas fa-play mr-1"></i>
+                </button>
+                {% endif %}
+
+                {% if plan.status == 'in_progress' %}
+                <button hx-get="{% url 'maintenance:plan_complete' plan.pk %}"
+                        hx-target="#modal-content"
+                        class="btn btn-sm btn-primary"
+                        title="Завершить ТО">
+                    <i class="fas fa-check mr-1"></i>
+                </button>
+                {% endif %}
+
                 <button hx-get="{% url 'maintenance:plan_update' plan.pk %}"
                         hx-target="#modal-content"
                         class="btn btn-sm btn-outline"
                         title="Редактировать">
                     <i class="fas fa-edit"></i>
                 </button>
+
                 <button hx-post="{% url 'maintenance:plan_delete' plan.pk %}"
                         hx-confirm="Удалить план ТО для {{ plan.equipment.name }}?"
                         class="btn btn-sm btn-error btn-outline"
