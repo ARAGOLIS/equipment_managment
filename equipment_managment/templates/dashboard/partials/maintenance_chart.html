@@ -1,0 +1,36 @@
+<div class="card bg-base-200 shadow">
+    <div class="card-body">
+        <h2 class="card-title">
+            <i class="fas fa-chart-line mr-2"></i>
+            Обслуживания по дням
+        </h2>
+        <div class="h-64 overflow-hidden">
+            <canvas id="maintenance-chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('maintenance-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ maintenance_labels|safe }},
+            datasets: [{
+                label: 'Количество обслуживаний',
+                data: {{ maintenance_data|safe }},
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+        }
+    });
+});
+</script>
