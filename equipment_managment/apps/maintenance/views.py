@@ -6,7 +6,7 @@ from django.db import transaction
 import json
 from django.utils import timezone
 from .models import MaintenancePlan, MaintenanceType, MaintenanceLog, Part
-from .forms import MaintenancePlanForm
+from .forms import MaintenancePlanForm, CompleteMaintenanceForm
 
 
 class MaintenancePlanListView(ListView):
@@ -119,6 +119,63 @@ def maintenance_plan_delete(request, pk):
             }
         )
     return HttpResponse(status=405)
+
+
+def start_maintenance(request, pk):
+    plan = get_object_or_404(MaintenancePlan, pk=pk)
+    if plan.status != 'planned':
+        return HttpResponse(status=400)
+
+    plan.status = 'in_progress'
+    plan.save()
+
+    return HttpResponse(
+        status=204,
+        headers={'HX-Trigger': json.dumps({
+            'refreshTable': '',
+            'showToast': {
+                'message': f'ТО для {plan.equipment.name} начато',
+                'type': 'success'
+            }
+        })}
+    )
+
+
+@transaction.atomic
+def complete_maintenance(request, pk):
+    plan = get_object_or_404(MaintenancePlan, pk=pk)
+
+    if request.method == 'POST':
+        form = CompleteMaintenanceForm(request.POST)
+        if form.is_valid():
+            log = form.save(commit=False)
+            log.plan = plan
+            #log.completed_by = request.user.employee #Вопрос, как лучше то по итогу
+            log.save()
+            form.save_m2m()  # Для parts_used
+
+            plan.status = 'completed'
+            plan.save()
+
+            return HttpResponse(
+                status=204,
+                headers={
+                    'HX-Trigger': json.dumps({
+                        'closeModal': '',
+                        'refreshTable': '',
+                        'showToast': {
+                            'message': f'ТО для {plan.equipment.name} завершено',
+                            'type': 'success'
+                        }
+                    })
+                }
+            )
+    else:
+        form = CompleteMaintenanceForm(initial={'plan': plan})
+
+    return render(request, "maintenance/partials/complete_form.html", {'form': form, 'plan': plan})
+
+
 
 
 def maintenance_plan_filter(request):
