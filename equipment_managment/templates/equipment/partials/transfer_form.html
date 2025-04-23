@@ -29,7 +29,7 @@
                 <label class="label">
                     <span class="label-text font-medium">Текущий владелец</span>
                 </label>
-                <input type="text" class="input input-bordered" value="{{ equipment.current_owner }}" readonly>
+                <input type="text" class="input input-bordered" value="{{ equipment.current_owner.id }}" readonly>
             </div>
 
             {% for field in form %}
