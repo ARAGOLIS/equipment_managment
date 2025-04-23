@@ -1,0 +1,25 @@
+<div class="card bg-base-200 shadow-xl flex flex-col h-full">
+    <div class="card-body">
+        <h2 class="card-title text-lg font-bold">Последние логи ТО</h2>
+        {% if recent_logs %}
+        <div class="space-y-4">
+            {% for log in recent_logs %}
+            <div class="border-b pb-2 last:border-b-0">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-medium">{{ log.plan.equipment.name }}</p>
+                        <p class="text-sm text-gray-500">{{ log.plan.maintenance_type.name }}</p>
+                        <p class="text-xs text-gray-400">{{ log.actual_date|date:"d.m.Y H:i" }}</p>
+                    </div>
+                    <span class="badge {% if log.plan.status == 'planned' %}badge-info{% elif log.plan.status == 'in_progress' %}badge-warning{% elif log.plan.status == 'completed' %}badge-success{% elif log.plan.status == 'cancelled' %}badge-error{% else %}badge-neutral{% endif %}">
+                        {{ log.plan.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500">Логи ТО отсутствуют.</p>
+        {% endif %}
+    </div>
+</div>

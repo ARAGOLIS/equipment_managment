@@ -44,7 +44,7 @@ class MaintenancePlanListView(ListView):
         context = super().get_context_data(**kwargs)
         context['status_choices'] = MaintenancePlan.STATUS_CHOICES
         context['maintenance_types'] = MaintenanceType.objects.all()
-        context['maintenance_types'] = MaintenanceType.objects.all()
+
 
         return context
 

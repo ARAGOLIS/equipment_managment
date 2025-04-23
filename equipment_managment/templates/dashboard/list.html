@@ -17,18 +17,20 @@
 
     <!-- Второй ряд -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[400px]">
-        <div class="lg:col-span-2">
+        <div class="lg:col-span-1">
             {% include "dashboard/partials/category_chart.html" %}
         </div>
         <div class="lg:col-span-1">
             {% include "dashboard/partials/transfers_table.html" %}
+        </div>
+        <div class="lg:col-span-1">
+            {% include "dashboard/partials/recent_maintenance_logs.html" %}
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-
 document.addEventListener('DOMContentLoaded', function() {
     // Инициализация графиков
 });

@@ -3,8 +3,9 @@ from django.shortcuts import render
 from django.utils import timezone
 from datetime import timedelta
 from equipment.models import Equipment, EquipmentTransfer, EquipmentCategory, EquipmentWriteOff
-from maintenance.models import MaintenancePlan
+from maintenance.models import MaintenancePlan, MaintenanceLog
 from django.db.models import Count
+
 
 def dashboard_view(request):
     # Ближайшие обслуживания (ближайшая неделя)
@@ -31,8 +32,6 @@ def dashboard_view(request):
     # Данные для круговой диаграммы: оборудование по статусу
     recent_writeoffs = EquipmentWriteOff.objects.all().order_by('-write_off_date')[:3]
 
-
-
     # Данные для столбчатой диаграммы: оборудование по категориям
     equipment_by_category = Equipment.objects.values('category__name').annotate(
         count=Count('id')
@@ -45,6 +44,10 @@ def dashboard_view(request):
         'equipment', 'from_location', 'to_location', 'from_employee', 'to_employee'
     ).order_by('-transfer_date')[:3]
 
+    recent_logs = MaintenanceLog.objects.select_related(
+        'plan__equipment', 'plan__maintenance_type').order_by(
+        '-actual_date')[:3]
+
     context = {
         'upcoming_maintenances': upcoming_maintenances,
         'maintenance_labels': maintenance_labels,
@@ -53,5 +56,6 @@ def dashboard_view(request):
         'category_labels': category_labels,
         'category_data': category_data,
         'recent_transfers': recent_transfers,
+        'recent_logs': recent_logs,
     }
     return render(request, 'dashboard/list.html', context)
