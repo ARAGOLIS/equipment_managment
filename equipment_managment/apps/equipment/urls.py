@@ -11,6 +11,4 @@ urlpatterns = [
     path('<int:pk>/transfer/', views.equipment_transfer, name='transfer'),
     path('<int:pk>/writeoff/', views.equipment_writeoff, name='writeoff'),
     path('filter/', views.equipment_filter, name='equipment_filter'),
-    path('transfers/', views.equipment_transfer_list, name='transfer_list'),
-    path('writeoffs/', views.equipment_write_off_list, name='write_off_list')
 ]

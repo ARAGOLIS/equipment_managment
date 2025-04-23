@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'apps.equipment',
     'apps.employees',
     'apps.maintenance',
-    'apps.dashboard'
+    #'apps.dashboard'
 ]
 
 MIDDLEWARE = [
