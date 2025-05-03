@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title >Учёт оборудования</title>
+    <title>Учёт оборудования</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -20,21 +20,98 @@
         .htmx-request.htmx-indicator {
             opacity: 1;
         }
+        /* Enhanced dropdown styling */
+        .dropdown-content {
+            transform: translateY(4px);
+            transition: all 0.2s ease-out;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            padding: 8px 0;
+            z-index: 10;
+        }
+        .dropdown-content li {
+            width: 100%;
+            margin: 0;
+            list-style: none;
+        }
+        .dropdown-content form {
+            width: 100%;
+            margin: 0;
+        }
+        .dropdown-content button {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            transition: background-color 0.2s ease;
+            background: transparent;
+            border: none;
+            text-align: left;
+            user-select: none;
+            color: #ff5555;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1.5;
+            outline: none;
+        }
+        .dropdown-content button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .dropdown-content button span,
+        .dropdown-content button i {
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="min-h-screen" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <header class="bg-base-200 p-4 shadow-lg">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-primary" >
+            <!-- Логотип/название системы -->
+            <h1 class="text-2xl font-bold text-primary">
                 <a href="{% url 'dashboard:dashboard' %}" class="hover:text-primary">Учет оборудования</a>
             </h1>
-            <nav>
+
+            <!-- Основная навигация + блок пользователя -->
+            <nav class="flex items-center space-x-6">
                 <ul class="flex space-x-6">
                     <li><a href="{% url 'employees:list' %}" class="hover:text-primary">Сотрудники</a></li>
                     <li><a href="{% url 'equipment:list' %}" class="hover:text-primary">Оборудование</a></li>
                     <li><a href="{% url 'maintenance:plan_list' %}" class="hover:text-primary">Обслуживание</a></li>
-                    <li><a href="{% url 'admin:index' %}" class="hover:text-primary">Админ-панель</a></li>
+                    {% if user.is_authenticated and user.is_superuser %}
+                        <li><a href="{% url 'admin:index' %}" class="hover:text-primary">Админ-панель</a></li>
+                    {% endif %}
                 </ul>
+
+                <!-- Блок авторизованного пользователя -->
+                {% if user.is_authenticated %}
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="flex items-center space-x-2 cursor-pointer">
+                        <!-- Аватарка с инициалом -->
+                        <div class="avatar placeholder">
+                            <div class="bg-neutral text-neutral-content rounded-full w-8">
+                                <span class="text-xs">{{ user.username|first|upper }}</span>
+                            </div>
+                        </div>
+                        <!-- Имя пользователя (скрыто на мобильных) -->
+                        <span class="text-sm hidden md:inline">{{ user.username }}</span>
+                    </div>
+                    <!-- Выпадающее меню -->
+                    <ul tabindex="0" class="dropdown-content z-[1] mt-4">
+                        <li>
+                            <form action="{% url 'logout' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit">
+                                    <span>Выйти</span>
+                                    <i class="fas fa-sign-out-alt"></i>
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
             </nav>
         </div>
     </header>
@@ -46,7 +123,6 @@
     <div id="modal" class="modal" hidden>
         <div class="modal-backdrop" onclick="closeModal()"></div>
         <div class="modal-box max-w-5xl" id="modal-content">
-            <!-- Контент модального окна будет здесь -->
         </div>
     </div>
 

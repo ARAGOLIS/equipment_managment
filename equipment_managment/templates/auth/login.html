@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-8rem)] bg-base-100 px-4">
+  <div class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-base-200 rounded-xl shadow-lg transition-all duration-300">
+    <h2 class="text-2xl sm:text-3xl font-bold text-center text-primary">Вход в систему</h2>
+
+    <form method="post" class="space-y-5" id="login-form" hx-indicator="#loading-indicator">
+      {% csrf_token %}
+
+      <!-- Username Field -->
+      <div class="form-control relative">
+        <label class="label" for="{{ form.username.id_for_label }}">
+          <span class="label-text text-base">Имя пользователя</span>
+        </label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+            <i class="fas fa-user text-base-content opacity-50"></i>
+          </span>
+          <input type="text"
+                 name="{{ form.username.name }}"
+                 id="{{ form.username.id_for_label }}"
+                 class="input input-bordered w-full pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary"
+                 placeholder="Введите имя пользователя"
+                 required
+                 aria-describedby="username-error">
+        </div>
+        {% if form.username.errors %}
+          <span class="text-error text-sm mt-1" id="username-error">{{ form.username.errors.0 }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-control relative">
+        <label class="label" for="{{ form.password.id_for_label }}">
+          <span class="label-text text-base">Пароль</span>
+        </label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+            <i class="fas fa-lock text-base-content opacity-50"></i>
+          </span>
+          <input type="password"
+                 name="{{ form.password.name }}"
+                 id="{{ form.password.id_for_label }}"
+                 class="input input-bordered w-full pl-10 pr-10 transition-all duration-200 focus:ring-2 focus:ring-primary"
+                 placeholder="Введите пароль"
+                 required
+                 aria-describedby="password-error">
+          <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 toggle-password" aria-label="Toggle password visibility">
+            <i class="fas fa-eye text-base-content opacity-50"></i>
+          </button>
+        </div>
+        {% if form.password.errors %}
+          <span class="text-error text-sm mt-1" id="password-error">{{ form.password.errors.0 }}</span>
+        {% endif %}
+      </div>
+
+      <!-- General Error Alert -->
+      {% if form.non_field_errors %}
+        <div class="alert alert-error flex items-center space-x-2 animate-fade-in">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{{ form.non_field_errors.0 }}</span>
+        </div>
+      {% endif %}
+
+
+
+      <!-- Submit Button -->
+      <div class="pt-2">
+        <button type="submit" class="btn btn-primary w-full relative flex items-center justify-center gap-2">
+          <span>Войти</span>
+          <div id="loading-indicator" class="htmx-indicator hidden absolute inset-0 flex items-center justify-center bg-primary bg-opacity-80 rounded-lg">
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Password visibility toggle
+  document.querySelectorAll('.toggle-password').forEach(button => {
+    button.addEventListener('click', () => {
+      const input = button.previousElementSibling;
+      const icon = button.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    });
+  });
+</script>
+
+<style>
+  /* Fade-in animation for alerts */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+{% endblock %}
